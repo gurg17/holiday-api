@@ -29,7 +29,7 @@ public class HolidayService {
         this.restTemplate = restTemplate;
     }
 
-    public List<Holiday> getLastThreeHolidays(String countryCode) {
+    public List<Map<String, String>> getLastThreeHolidays(String countryCode) {
         int currentYear = LocalDate.now().getYear();
         int lastYear = currentYear - 1;
 
@@ -42,6 +42,12 @@ public class HolidayService {
                 .filter(holiday -> holiday.getDate().isBefore(LocalDate.now()))
                 .sorted(Comparator.comparing(Holiday::getDate).reversed())
                 .limit(3)
+                .map(holiday -> {
+                    Map<String, String> holidayMap = new HashMap<>();
+                    holidayMap.put("name", holiday.getName());
+                    holidayMap.put("date", holiday.getDate().toString());
+                    return holidayMap;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -59,16 +65,24 @@ public class HolidayService {
         return holidayCounts;
     }
 
-    public List<Holiday> getCommonHolidays(int year, String countryCode1, String countryCode2) {
+    public List<Map<String, String>> getCommonHolidays(int year, String countryCode1, String countryCode2) {
         List<Holiday> holidaysCountry1 = fetchHolidaysForYear(year, countryCode1);
         List<Holiday> holidaysCountry2 = fetchHolidaysForYear(year, countryCode2);
 
-        Set<Holiday> commonHolidays = new HashSet<>(holidaysCountry1);
+        Map<LocalDate, Holiday> holidayMapCountry1 = holidaysCountry1.stream()
+                .collect(Collectors.toMap(Holiday::getDate, holiday -> holiday));
 
-        commonHolidays.retainAll(holidaysCountry2);
-
-        return commonHolidays.stream()
-                .sorted(Comparator.comparing(Holiday::getDate))
+        return holidaysCountry2.stream()
+                .filter(holiday -> holidayMapCountry1.containsKey(holiday.getDate()))
+                .map(holiday -> {
+                    Map<String, String> commonHolidayMap = new HashMap<>();
+                    LocalDate date = holiday.getDate();
+                    commonHolidayMap.put("date", date.toString());
+                    commonHolidayMap.put("name", holiday.getName());
+                    commonHolidayMap.put("localName-" + countryCode1, holidayMapCountry1.get(date).getLocalName());
+                    commonHolidayMap.put("localName-" + countryCode2, holiday.getLocalName());
+                    return commonHolidayMap;
+                })
                 .collect(Collectors.toList());
     }
 }

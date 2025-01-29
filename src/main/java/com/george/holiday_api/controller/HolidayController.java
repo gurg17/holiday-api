@@ -22,7 +22,7 @@ public class HolidayController {
     }
 
     @GetMapping("/{countryCode}/last-three")
-    public List<Holiday> getLastThreeHolidays(@PathVariable String countryCode) {
+    public List<Map<String, String>> getLastThreeHolidays(@PathVariable String countryCode) {
         return holidayService.getLastThreeHolidays(countryCode);
     }
 
@@ -32,7 +32,7 @@ public class HolidayController {
     }
 
     @GetMapping("/{year}/common-holidays")
-    public List<Holiday> getCommonHolidays(@PathVariable int year,
+    public List<Map<String, String>> getCommonHolidays(@PathVariable int year,
             @RequestParam String countryCode1,
             @RequestParam String countryCode2) {
         return holidayService.getCommonHolidays(year, countryCode1, countryCode2);
