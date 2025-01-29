@@ -1,6 +1,7 @@
 package com.george.holiday_api.model;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class Holiday {
     private LocalDate date;
@@ -48,5 +49,22 @@ public class Holiday {
 
     public void setCountryCode(String countryCode) {
         this.countryCode = countryCode;
+    }
+
+    // Override equals() to compare holidays based on date and name
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        Holiday holiday = (Holiday) obj;
+        return Objects.equals(date, holiday.date) && Objects.equals(name, holiday.name);
+    }
+
+    // Override hashCode() to match equals() implementation
+    @Override
+    public int hashCode() {
+        return Objects.hash(date, name);
     }
 }
